@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Whitelist Panel</title>
+  <style>
+    /* Smooth background gradient */
+    body {
+      background: linear-gradient(135deg, #1f1c2c, #928dab);
+      font-family: 'Inter', sans-serif;
+      color: white;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    /* Main container */
+    .container {
+      width: 400px;
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.8), 0 0 10px #6a85b6;
+      animation: slideIn 0.5s ease-in-out;
+    }
+
+    /* Title styling */
+    .title {
+      font-size: 26px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px #6a85b6;
+    }
+
+    /* User list container */
+    .user-list {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .user-list::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .user-list::-webkit-scrollbar-thumb {
+      background: #6a85b6;
+      border-radius: 4px;
+    }
+
+    .user {
+      display: flex;
+      align-items: center;
+      padding: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .user:last-child {
+      border-bottom: none;
+    }
+
+    .user img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 10px;
+      box-shadow: 0 0 8px #6a85b6;
+    }
+
+    /* Add button styling */
+    .add-btn {
+      background: linear-gradient(135deg, #6a85b6, #bac8e0);
+      color: black;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    .add-btn:hover {
+      background: #a3b8db;
+      box-shadow: 0 0 10px #a3b8db;
+    }
+
+    /* Popup styles */
+    .popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 300px;
+      background: rgba(0, 0, 0, 0.9);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px #6a85b6;
+      display: none;
+    }
+
+    .popup.active {
+      display: block;
+    }
+
+    .popup-title {
+      font-size: 20px;
+      margin-bottom: 15px;
+      text-align: center;
+      color: #a3b8db;
+    }
+
+    .popup input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      outline: none;
+      font-size: 14px;
+    }
+
+    .confirm-btn {
+      background: linear-gradient(135deg, #6a85b6, #bac8e0);
+      color: black;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    .confirm-btn:hover {
+      background: #a3b8db;
+      box-shadow: 0 0 10px #a3b8db;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Dynamic content -->
+  <div id="content"></div>
+
+  <script>
+    // Simulated whitelist of usernames
+    const whitelist = ['user1', 'user2', 'user3'];
+
+    // Extract query parameters (username)
+    const queryParams = new URLSearchParams(window.location.search);
+    const username = queryParams.get('username');
+
+    const content = document.getElementById('content');
+
+    if (username === 'admin') {
+      // Admin Panel
+      content.innerHTML = `
+        <div class="container">
+          <div class="title">Whitelist Users</div>
+          <div class="user-list" id="userList"></div>
+          <button class="add-btn" onclick="showPopup()">Add Username</button>
+        </div>
+
+        <div class="popup" id="popup">
+          <div class="popup-title">Whitelist</div>
+          <input type="text" id="usernameInput" placeholder="Enter Username">
+          <button class="confirm-btn" onclick="addUsername()">Confirm</button>
+        </div>
+      `;
+    } else if (whitelist.includes(username)) {
+      // Whitelisted user
+      document.body.innerHTML = `<pre>Hi, you're whitelisted!</pre>`;
+    } else {
+      // Non-whitelisted user
+      document.body.innerHTML = `<pre>Hi, can you stop skidding.</pre>`;
+    }
+
+    // Whitelist logic
+    const userList = document.getElementById('userList');
+    const popup = document.getElementById('popup');
+    const usernameInput = document.getElementById('usernameInput');
+
+    function showPopup() {
+      popup.classList.add('active');
+    }
+
+    function hidePopup() {
+      popup.classList.remove('active');
+      usernameInput.value = '';
+    }
+
+    function addUsername() {
+      const newUser = usernameInput.value.trim();
+      if (newUser && !whitelist.includes(newUser)) {
+        whitelist.push(newUser);
+
+        // Add new user to the list
+        const userDiv = document.createElement('div');
+        userDiv.className = 'user';
+        userDiv.innerHTML = `
+          <img src="https://www.roblox.com/headshot-thumbnail/image?userId=${Math.floor(Math.random() * 10000000)}&width=150&height=150&format=png" alt="${newUser}">
+          <span>${newUser}</span>
+        `;
+        userList.appendChild(userDiv);
+      }
+      hidePopup();
+    }
+  </script>
+</body>
+</html>
