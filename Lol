@@ -1,0 +1,70 @@
+local Fov = 150
+local Enabled = false
+local Player = game:GetService("Players").LocalPlayer
+local Cam = workspace.CurrentCamera
+local RS = game:GetService("RunService")
+local Vec2 = Vector2.new
+
+local Gui = Instance.new("ScreenGui")
+Gui.Name = "FOVSpectateGui"
+Gui.ResetOnSpawn = false
+Gui.Parent = game:GetService("CoreGui")
+
+local Btn = Instance.new("TextButton")
+Btn.Size = UDim2.new(0, 80, 0, 30)
+Btn.Position = UDim2.new(0, 10, 0, 10)
+Btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+Btn.Text = "Off"
+Btn.Font = Enum.Font.SourceSansBold
+Btn.TextSize = 18
+Btn.Parent = Gui
+
+Btn.MouseButton1Click:Connect(function()
+	Enabled = not Enabled
+	Btn.Text = Enabled and "On" or "Off"
+	if not Enabled then
+		Cam.CameraSubject = Player.Character and Player.Character:FindFirstChild("Humanoid") or nil
+	end
+end)
+
+local Circle = Drawing.new("Circle")
+Circle.Radius = Fov
+Circle.Thickness = 1
+Circle.Transparency = 1
+Circle.Filled = false
+Circle.Color = Color3.fromRGB(255,255,255)
+Circle.Visible = true
+
+RS.RenderStepped:Connect(function()
+	Circle.Position = Cam.ViewportSize / 2
+
+	if not Enabled then return end
+
+	local Closest,Mag = nil,Fov
+	for _,v in ipairs(workspace:GetDescendants()) do
+		local H = v:FindFirstChild("Head")
+		if v:IsA("Model") and H and v:FindFirstChild("Humanoid") and not game:GetService("Players"):GetPlayerFromCharacter(v) then
+			local P,Vis = Cam:WorldToViewportPoint(H.Position)
+			if Vis then
+				local D = (Vec2(P.X,P.Y) - Circle.Position).Magnitude
+				if D < Mag then
+					Mag = D
+					Closest = H
+				end
+			end
+		end
+	end
+
+	if Closest then
+		pcall(function()
+			Closest.Size = Vector3.new(5,5,5)
+			Closest.CanCollide = false
+			Closest.Transparency = 0.5
+		end)
+		Cam.CameraSubject = nil
+		Cam.CFrame = CFrame.new(Cam.CFrame.Position, Closest.Position)
+	else
+		Cam.CameraSubject = Player.Character and Player.Character:FindFirstChild("Humanoid") or nil
+	end
+end)
